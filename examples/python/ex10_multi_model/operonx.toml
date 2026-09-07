@@ -19,3 +19,8 @@ graph   = "main:main_flow"
 session = "per_request"
 description = "The one main flow: payload in at ingress, answer out at egress."
 
+
+# ── studio ──────────────────────────────────────────────────────────────
+# Where the local trace consumer writes runs; the Traces tab reads this.
+[studio]
+traces = "/tmp/operonx_traces/ex10_multi_model"

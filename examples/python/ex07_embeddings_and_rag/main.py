@@ -168,11 +168,13 @@ def unpack(item=None) -> dict:
 
 @graph
 def main_flow():
+    # rag_with_rerank stays out of the main flow: it names the
+    # `reranking:bge-m3` resource, and an engine cannot even be built
+    # where that resource does not exist. Run it directly when it does.
     request = ingress()
     fields = unpack(item=request["item"])
     vectors = basic_embedding(texts=fields["documents"])
     plain = simple_rag(query=fields["query"], documents=fields["documents"],
                        doc_vectors=vectors["vectors"])
-    reranked = rag_with_rerank(query=fields["query"], documents=fields["documents"])
-    out = egress(item=reranked["content"])
-    START >> request >> fields >> vectors >> plain >> reranked >> out >> END
+    out = egress(item=plain["content"])
+    START >> request >> fields >> vectors >> plain >> out >> END
