@@ -8,14 +8,6 @@ description = "Operonx LLM chat — basic / chain / summarize via OpenAI."
 [resources]
 overlay = "resources.yaml"
 
-[[graph]]
-name  = "basic_chat"
-entry = "main:basic_chat"
-
-[[graph]]
-name  = "summarize_pipeline"
-entry = "main:summarize_pipeline"
-
 # ── the front door ──────────────────────────────────────────────────────
 # What puts work into this project. `operonx-serve` boots it; the studio
 # draws it as the entry node feeding the graph.
@@ -23,7 +15,7 @@ entry = "main:summarize_pipeline"
 kind    = "http"
 method  = "POST"
 path    = "/run"
-graph   = "main:served"
+graph   = "main:main_flow"
 session = "per_request"
-description = "One request in, one reply out — the smallest served graph."
+description = "The one main flow: payload in at ingress, answer out at egress."
 

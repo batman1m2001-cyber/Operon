@@ -8,14 +8,6 @@ description = "Operonx tool-calling agent on @graph with until= loop."
 [resources]
 overlay = "resources.yaml"
 
-[[graph]]
-name  = "agent_loop"
-entry = "main:agent_loop"
-
-[[graph]]
-name  = "agent"
-entry = "main:agent"
-
 # ── the front door ──────────────────────────────────────────────────────
 # What puts work into this project. `operonx-serve` boots it; the studio
 # draws it as the entry node feeding the graph.
@@ -23,7 +15,7 @@ entry = "main:agent"
 kind    = "http"
 method  = "POST"
 path    = "/run"
-graph   = "main:served"
+graph   = "main:main_flow"
 session = "per_request"
-description = "One request in, one reply out — the smallest served graph."
+description = "The one main flow: payload in at ingress, answer out at egress."
 

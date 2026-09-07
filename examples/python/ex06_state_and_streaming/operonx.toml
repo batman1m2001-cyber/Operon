@@ -5,18 +5,6 @@
 name = "ex06-state-and-streaming"
 description = "SCRATCH run-scoped state, EmitOp side channels, InterruptOp human-in-the-loop."
 
-[[graph]]
-name  = "scratch_flow"
-entry = "main:scratch_flow"
-
-[[graph]]
-name  = "progress_flow"
-entry = "main:progress_flow"
-
-[[graph]]
-name  = "approval_flow"
-entry = "main:approval_flow"
-
 # ── the front door ──────────────────────────────────────────────────────
 # What puts work into this project. `operonx-serve` boots it; the studio
 # draws it as the entry node feeding the graph.
@@ -24,7 +12,7 @@ entry = "main:approval_flow"
 kind    = "http"
 method  = "POST"
 path    = "/run"
-graph   = "main:served"
+graph   = "main:main_flow"
 session = "per_request"
-description = "One request in, one reply out — the smallest served graph."
+description = "The one main flow: payload in at ingress, answer out at egress."
 

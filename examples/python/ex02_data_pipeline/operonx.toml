@@ -5,14 +5,6 @@
 name = "ex02-data-pipeline"
 description = "Operonx data pipelines — pure compute, no API keys."
 
-[[graph]]
-name  = "data_pipeline"
-entry = "main:data_pipeline"
-
-[[graph]]
-name  = "text_pipeline"
-entry = "main:text_pipeline"
-
 # ── the front door ──────────────────────────────────────────────────────
 # What puts work into this project. `operonx-serve` boots it; the studio
 # draws it as the entry node feeding the graph.
@@ -20,7 +12,7 @@ entry = "main:text_pipeline"
 kind    = "http"
 method  = "POST"
 path    = "/run"
-graph   = "main:served"
+graph   = "main:main_flow"
 session = "per_request"
-description = "One request in, one reply out — the smallest served graph."
+description = "The one main flow: payload in at ingress, answer out at egress."
 

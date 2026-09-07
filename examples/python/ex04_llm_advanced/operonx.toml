@@ -8,18 +8,6 @@ description = "Operonx LLM advanced — structured output, tool calling, multi-t
 [resources]
 overlay = "resources.yaml"
 
-[[graph]]
-name  = "structured_output"
-entry = "main:structured_output"
-
-[[graph]]
-name  = "tool_calling"
-entry = "main:tool_calling"
-
-[[graph]]
-name  = "multi_turn"
-entry = "main:multi_turn"
-
 # ── the front door ──────────────────────────────────────────────────────
 # What puts work into this project. `operonx-serve` boots it; the studio
 # draws it as the entry node feeding the graph.
@@ -27,7 +15,7 @@ entry = "main:multi_turn"
 kind    = "http"
 method  = "POST"
 path    = "/run"
-graph   = "main:served"
+graph   = "main:main_flow"
 session = "per_request"
-description = "One request in, one reply out — the smallest served graph."
+description = "The one main flow: payload in at ingress, answer out at egress."
 

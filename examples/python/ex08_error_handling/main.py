@@ -141,29 +141,31 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 
-# ── the served front door ───────────────────────────────────────────────
-# Every operonx project serves. The [[serve]] block in operonx.toml names
-# this graph, `operonx-serve` boots it, and the studio draws it as the
-# entry node feeding the flow — no pipeline begins from nowhere.
-#
-# `ingress` yields one item per request payload and `egress` writes the
-# reply back to the caller. Neither names a resource: the run was minted
-# by a transport and already carries its session — and with no session the
-# same graph still runs under a plain `engine.start()`, so serving costs
-# the example nothing.
+# ── the served main flow ───────────────────────────────────────────────
+# One main graph, served: ingress in, the four error techniques composed
+# as nested graphs, egress out. error_capture fails on purpose — the run
+# records it and carries on, which is the lesson.
 from operonx.core.serve import egress, ingress
 
 
 @op
-def answer(item=None) -> dict:
-    """One request in, this example's reply out."""
-    return {"reply": f"ex08 saw: {item!r}"}
+def unpack(item=None) -> dict:
+    """Payload → the fields the flows below consume."""
+    item = item if isinstance(item, dict) else {}
+    return {
+        "a": item.get("a", 10),
+        "b": item.get("b", 0),
+        "query": item.get("query", "What is operonx?"),
+    }
 
 
 @graph
-def served():
+def main_flow():
     request = ingress()
-    a = answer(item=request["item"])
-    out = egress(item=a["reply"])
-    START >> request >> a >> out >> END
-
+    fields = unpack(item=request["item"])
+    captured = error_capture()
+    routed = error_routing(a=fields["a"], b=fields["b"])
+    retried = retry_fallback(query=fields["query"])
+    modeled = llm_fallback(query=fields["query"])
+    out = egress(item=modeled["content"])
+    START >> request >> fields >> captured >> routed >> retried >> modeled >> out >> END

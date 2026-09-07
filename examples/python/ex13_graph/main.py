@@ -106,29 +106,32 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 
-# ── the served front door ───────────────────────────────────────────────
-# Every operonx project serves. The [[serve]] block in operonx.toml names
-# this graph, `operonx-serve` boots it, and the studio draws it as the
-# entry node feeding the flow — no pipeline begins from nowhere.
-#
-# `ingress` yields one item per request payload and `egress` writes the
-# reply back to the caller. Neither names a resource: the run was minted
-# by a transport and already carries its session — and with no session the
-# same graph still runs under a plain `engine.start()`, so serving costs
-# the example nothing.
+# ── the served main flow ───────────────────────────────────────────────
+# One main graph, served: every composition scenario nested inside it.
+# This example IS nesting — open the containers on the studio canvas and
+# keep opening: quad_flow holds double_flow holds double.
 from operonx.core.serve import egress, ingress
 
 
 @op
-def answer(item=None) -> dict:
-    """One request in, this example's reply out."""
-    return {"reply": f"ex13 saw: {item!r}"}
+def unpack(item=None) -> dict:
+    """Payload → the numbers the scenarios consume."""
+    item = item if isinstance(item, dict) else {}
+    return {
+        "val": item.get("val", 5),
+        "x": item.get("x", 3),
+        "y": item.get("y", 4),
+    }
 
 
 @graph
-def served():
+def main_flow():
     request = ingress()
-    a = answer(item=request["item"])
-    out = egress(item=a["reply"])
-    START >> request >> a >> out >> END
-
+    fields = unpack(item=request["item"])
+    one = basic(val=fields["val"])
+    three = chained(val=fields["val"])
+    named = renamed(val=fields["val"])
+    two_in = multi_params(x=fields["x"], y=fields["y"])
+    deep = nested(val=fields["val"])
+    out = egress(item=deep["result"])
+    START >> request >> fields >> one >> three >> named >> two_in >> deep >> out >> END

@@ -150,29 +150,29 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 
-# ── the served front door ───────────────────────────────────────────────
-# Every operonx project serves. The [[serve]] block in operonx.toml names
-# this graph, `operonx-serve` boots it, and the studio draws it as the
-# entry node feeding the flow — no pipeline begins from nowhere.
-#
-# `ingress` yields one item per request payload and `egress` writes the
-# reply back to the caller. Neither names a resource: the run was minted
-# by a transport and already carries its session — and with no session the
-# same graph still runs under a plain `engine.start()`, so serving costs
-# the example nothing.
+# ── the served main flow ───────────────────────────────────────────────
+# One main graph, served — and the nested graphs genuinely feed each
+# other: basic_embedding's vectors are simple_rag's doc_vectors.
 from operonx.core.serve import egress, ingress
 
 
 @op
-def answer(item=None) -> dict:
-    """One request in, this example's reply out."""
-    return {"reply": f"ex07 saw: {item!r}"}
+def unpack(item=None) -> dict:
+    """Payload → the fields the flows below consume."""
+    item = item if isinstance(item, dict) else {}
+    return {
+        "query": item.get("query", "RAG là gì?"),
+        "documents": item.get("documents", DOCUMENTS),
+    }
 
 
 @graph
-def served():
+def main_flow():
     request = ingress()
-    a = answer(item=request["item"])
-    out = egress(item=a["reply"])
-    START >> request >> a >> out >> END
-
+    fields = unpack(item=request["item"])
+    vectors = basic_embedding(texts=fields["documents"])
+    plain = simple_rag(query=fields["query"], documents=fields["documents"],
+                       doc_vectors=vectors["vectors"])
+    reranked = rag_with_rerank(query=fields["query"], documents=fields["documents"])
+    out = egress(item=reranked["content"])
+    START >> request >> fields >> vectors >> plain >> reranked >> out >> END

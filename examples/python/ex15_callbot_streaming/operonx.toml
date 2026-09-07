@@ -5,14 +5,6 @@
 name = "ex15-callbot-streaming"
 description = "Operonx multi-level streaming callbot pipeline."
 
-[[graph]]
-name  = "llm_router"
-entry = "main:llm_router"
-
-[[graph]]
-name  = "callbot"
-entry = "main:callbot"
-
 # ── the front door ──────────────────────────────────────────────────────
 # One socket, one long-lived run — the shape the real callbot uses. The
 # bound is mandatory for a stream: a peer that never slows down needs

@@ -82,29 +82,28 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 
-# ── the served front door ───────────────────────────────────────────────
-# Every operonx project serves. The [[serve]] block in operonx.toml names
-# this graph, `operonx-serve` boots it, and the studio draws it as the
-# entry node feeding the flow — no pipeline begins from nowhere.
-#
-# `ingress` yields one item per request payload and `egress` writes the
-# reply back to the caller. Neither names a resource: the run was minted
-# by a transport and already carries its session — and with no session the
-# same graph still runs under a plain `engine.start()`, so serving costs
-# the example nothing.
+# ── the served main flow ───────────────────────────────────────────────
+# Every operonx project is ONE main graph, served: `ingress` is the door
+# where the client's payload enters, `egress` the door where the answer
+# leaves, and the teaching flows above are composed in between as nested
+# graphs — open them on the studio canvas to see inside. `operonx-serve`
+# boots the [[serve]] block in operonx.toml that names this graph.
 from operonx.core.serve import egress, ingress
 
 
 @op
-def answer(item=None) -> dict:
-    """One request in, this example's reply out."""
-    return {"reply": f"ex01 saw: {item!r}"}
+def unpack(item=None) -> dict:
+    """Payload → the fields the flows below consume."""
+    item = item if isinstance(item, dict) else {}
+    return {"who": item.get("who", "Operon")}
 
 
 @graph
-def served():
+def main_flow():
     request = ingress()
-    a = answer(item=request["item"])
-    out = egress(item=a["reply"])
-    START >> request >> a >> out >> END
-
+    fields = unpack(item=request["item"])
+    hello = hello_world(who=fields["who"])
+    chain = two_steps(who=fields["who"])
+    both = fan_out_in()
+    out = egress(item=both["combined"])
+    START >> request >> fields >> hello >> chain >> both >> out >> END
