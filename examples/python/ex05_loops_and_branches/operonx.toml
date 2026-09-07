@@ -24,6 +24,14 @@ entry = "main:branch"
 # ── the front door ──────────────────────────────────────────────────────
 # What puts work into this project. `operonx-serve` boots it; the studio
 # draws it as the entry node feeding the graph.
+[[graph]]
+name  = "collect_op"
+entry = "main:collect_op"
+
+[[graph]]
+name  = "agent_loop"
+entry = "main:agent_loop"
+
 [[serve]]
 kind    = "http"
 method  = "POST"
